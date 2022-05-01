@@ -35,6 +35,9 @@ client.on('messageCreate', async (msg) => {
         }, 2000)
     }
 })
+client.on('messageUpdate', (oldMsg, newMsg) => {
+    console.log('Old embeds:', oldMsg.embeds.length, ' New embeds:', newMsg.embeds)
+})
 
 client.login(process.env.TOKEN)
 
