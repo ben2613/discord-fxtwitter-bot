@@ -32,7 +32,7 @@ client.on('messageCreate', async (msg) => {
                 msg.delete()
                 msg.channel.send(`From ${msg.author} | ${build.join('')}`)
             }
-        }, 2000)
+        }, 5000)
     }
 })
 client.on('messageUpdate', (oldMsg, newMsg) => {
