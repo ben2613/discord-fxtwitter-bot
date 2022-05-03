@@ -1,4 +1,4 @@
-const { urlPattern, isTweetURL } = require('../utils.js')
+const { messageTemplate, urlPattern, isTweetURL } = require('../utils.js')
 
 module.exports = {
     name: 'messageCreate',
@@ -25,7 +25,7 @@ module.exports = {
                 })
                 if (needReplace) {
                     msg.delete()
-                    msg.channel.send(`From ${msg.author} | ${build.join('')}`)
+                    msg.channel.send(messageTemplate(msg.author, build.join('')))
                 }
             }, 5000)
         }
