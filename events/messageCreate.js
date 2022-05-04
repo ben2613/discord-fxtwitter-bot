@@ -13,7 +13,7 @@ module.exports = {
                 let build = []
 
                 let needReplace = false
-                let allEmbedUrl = msg.embeds.reduce((prev, next) => prev.url + next.url, '')
+                let allEmbedUrl = msg.embeds.reduce((urls, next) => urls + next.url, '')
                 parts.forEach((p) => {
                     if (isTweetURL(p) && !allEmbedUrl.includes(p)) {
                         // check if it is in embed
