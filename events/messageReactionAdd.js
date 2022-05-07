@@ -1,4 +1,4 @@
-const { authorIdRegex } = require('../utils.js')
+const { authorIdRegex } = require('../utils/utils.js')
 
 module.exports = {
     name: 'messageReactionAdd',

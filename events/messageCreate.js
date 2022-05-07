@@ -1,5 +1,5 @@
 const d = require('discord.js')
-const { messageTemplate, urlPattern, isTweetURL } = require('../utils.js')
+const { messageTemplate, urlPattern, isTweetURL } = require('../utils/utils.js')
 
 module.exports = {
     name: 'messageCreate',

@@ -1,5 +1,6 @@
 const fs = require('fs')
 const { Client, Intents, Collection } = require("discord.js")
+const DB = require('./utils/database.js')
 require('dotenv').config()
 
 const client = new Client({
@@ -26,6 +27,9 @@ for (const file of commandFiles) {
     const command = require(`./commands/${file}`)
     client.commands.set(command.data.name, command)
 }
+
+// Register DB into client, for events / commands to use
+client.db = new DB(process.env.DB_CONNSTR)
 
 client.once('ready', () => { console.log('Ready!') })
 
