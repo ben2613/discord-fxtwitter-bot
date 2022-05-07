@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { Client, Intents } = require("discord.js")
+const { Client, Intents, Collection } = require("discord.js")
 require('dotenv').config()
 
 const client = new Client({
@@ -16,6 +16,15 @@ for (const file of eventFiles) {
     } else {
         client.on(event.name, (...args) => event.execute(...args))
     }
+}
+
+// Register commands
+client.commands = new Collection()
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`)
+    client.commands.set(command.data.name, command)
 }
 
 client.once('ready', () => { console.log('Ready!') })
