@@ -1,10 +1,36 @@
-import { Message } from "discord.js"
+import { Message, Role } from "discord.js"
+import { MyClient } from "src/types/client";
 
 const { messageTemplate, urlPattern, isTweetURL } = require('../utils/utils')
 
 module.exports = {
     name: 'messageCreate',
     async execute(msg: Message) {
+        // return if DM
+        if (msg.guild === null || msg.guildId === null) {
+            return;
+        }
+        // ignore if user belongs to a role blacklisted
+        let member = msg.guild.members.cache.get(msg.author.id);
+        if (member === undefined) {
+            console.error('Should not happen');
+            return
+        }
+        let mc = msg.client as MyClient;
+        let blacklist = await mc.db.get(msg.guildId, 'roleblacklist') as string[] | undefined;
+        let inBlacklist = false;
+        if (blacklist !== undefined) {
+            for (let role of member.roles.cache.values()) {
+                if (blacklist.includes(role.id)) {
+                    inBlacklist = true;
+                    console.log('Role ', role.name, ' cannot embed')
+                    break;
+                }
+            }
+        }
+        if (inBlacklist) {
+            return
+        }
         if (msg.content.includes("https://twitter.com/")) {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
