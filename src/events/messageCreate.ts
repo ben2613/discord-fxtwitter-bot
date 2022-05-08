@@ -1,16 +1,16 @@
-const d = require('discord.js')
-const { messageTemplate, urlPattern, isTweetURL } = require('../utils/utils.js')
+import { Message } from "discord.js"
+
+const { messageTemplate, urlPattern, isTweetURL } = require('../utils/utils')
 
 module.exports = {
     name: 'messageCreate',
-    /** @param {d.Message} msg */
-    async execute(msg) {
+    async execute(msg: Message) {
         if (msg.content.includes("https://twitter.com/")) {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
             setTimeout(async () => {
                 let parts = msg.content.split(urlPattern)
-                let build = []
+                let build: string[] = []
 
                 let needReplace = false
                 let allEmbedUrl = msg.embeds.reduce((urls, next) => urls + next.url, '')
@@ -28,7 +28,7 @@ module.exports = {
                 if (needReplace) {
                     msg.delete()
                     let newMsg = await msg.channel.send(messageTemplate(msg.author, build.join('')))
-                    const boki = msg.client.emojis.cache.find(emoji => emoji.name.includes('Boki'))
+                    const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
                     if (boki) {
                         await newMsg.react(boki)
                     }
