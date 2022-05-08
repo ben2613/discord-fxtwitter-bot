@@ -1,10 +1,10 @@
-import { Interaction } from "discord.js"
+import { CommandInteraction, Interaction } from "discord.js"
 import { MyClient } from "src/types/client"
 
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction: Interaction) {
-        if (!interaction.isCommand()) return
+        if (!interaction.isCommand() || !(interaction instanceof CommandInteraction)) return
         let client = interaction.client as MyClient
         const command = client.commands.get(interaction.commandName)
 

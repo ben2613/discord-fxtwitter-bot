@@ -31,7 +31,7 @@ client.commands = new Collection<string, Command>()
 if (fs.existsSync(path.join(__dirname, 'commands'))) {
     const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(f => f.endsWith('.js') || f.endsWith('.ts'))
     for (const file of commandFiles) {
-        const command = require(path.join(__dirname, 'commands', file))
+        const command = require(path.join(__dirname, 'commands', file)) as Command
         client.commands.set(command.data.name, command)
     }
 }
