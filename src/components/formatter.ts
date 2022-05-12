@@ -14,11 +14,11 @@ export default class Formatter {
                 // check if it is in embed
                 if (!allEmbedUrl.includes(p)) {
                     url.hostname = 'fxtwitter.com'
+                    ret.need = true;
                 }
                 // remove the query part
                 url.search = '';
                 build.push(url.toString())
-                ret.need = true;
             } else {
                 build.push(p)
             }
