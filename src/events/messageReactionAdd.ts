@@ -5,6 +5,10 @@ import utils from '../utils/utils'
 module.exports = {
     name: 'messageReactionAdd',
     execute: async function (reaction: MessageReaction, user: User) {
+        // ignore if it is sent by bot
+        if (user.bot) {
+            return
+        }
         if (reaction.partial) {
             try {
                 await reaction.fetch()
