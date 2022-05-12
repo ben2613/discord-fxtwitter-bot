@@ -1,7 +1,5 @@
-import { Message, Role } from "discord.js"
+import { Message, MessageEmbed, Role } from "discord.js"
 import { MyClient } from "src/types/client";
-
-const { messageTemplate, urlPattern, isTweetURL } = require('../utils/utils')
 
 module.exports = {
     name: 'messageCreate',
@@ -35,25 +33,10 @@ module.exports = {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
             setTimeout(async () => {
-                let parts = msg.content.split(urlPattern)
-                let build: string[] = []
-
-                let needReplace = false
-                let allEmbedUrl = msg.embeds.reduce((urls, next) => urls + next.url, '')
-                parts.forEach((p) => {
-                    if (isTweetURL(p) && !allEmbedUrl.includes(p)) {
-                        // check if it is in embed
-                        let url = new URL(p)
-                        url.hostname = 'fxtwitter.com'
-                        build.push(url.href)
-                        needReplace = true
-                    } else {
-                        build.push(p)
-                    }
-                })
-                if (needReplace) {
+                let { need, message } = mc.formatter.tryNeedFxtwitter(msg.content, msg.embeds);
+                if (need) {
                     msg.delete()
-                    let newMsg = await msg.channel.send(messageTemplate(msg.author, build.join('')))
+                    let newMsg = await msg.channel.send(mc.formatter.getOutgoingMessage(message, msg))
                     const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
                     if (boki) {
                         await newMsg.react(boki)
