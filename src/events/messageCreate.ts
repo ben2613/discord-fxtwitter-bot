@@ -29,6 +29,10 @@ module.exports = {
         if (inBlacklist) {
             return
         }
+        if (msg.content.split('||').length > 2) {
+            // if there is any spoiler pair I refuse to work
+            return;
+        }
         if (msg.content.includes("https://twitter.com/")) {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
