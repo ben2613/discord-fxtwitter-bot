@@ -6,6 +6,7 @@ import DB from './utils/database'
 import 'dotenv/config'
 import path from 'path';
 import { Command } from './types/command'
+import Formatter from './components/formatter'
 
 const client: MyClient = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
@@ -38,6 +39,8 @@ if (fs.existsSync(path.join(__dirname, 'commands'))) {
 
 // Register DB into client, for events / commands to use
 client.db = new DB(process.env.DB_CONNSTR)
+
+client.formatter = new Formatter()
 
 client.once('ready', () => { console.log('Ready!') })
 

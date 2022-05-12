@@ -1,6 +1,6 @@
 import { MessageReaction, User } from "discord.js"
 
-const { authorIdRegex } = require('../utils/utils')
+import utils from '../utils/utils'
 
 module.exports = {
     name: 'messageReactionAdd',
@@ -20,7 +20,7 @@ module.exports = {
         }
         if (reaction.message.content === null) return;
 
-        const matches = reaction.message.content.match(authorIdRegex)
+        const matches = reaction.message.content.match(utils.authorIdRegex)
         if (matches === null || matches.length !== 2) {
             console.error('Something wrong cannot get author ID from: ', reaction.message.content)
             return

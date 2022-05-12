@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     urlPattern: /((?:http|ftp|https):\/\/(?:[\w_-]+(?:(?:\.[\w_-]+)+))(?:[\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))/,
     messageTemplate: (author: string, content: string) => `From ${author} | ${content}`,
     authorIdRegex: /^From <@(\d+)>/,
