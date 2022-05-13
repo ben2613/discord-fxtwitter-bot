@@ -1,5 +1,5 @@
 import { Message, MessageEmbed, Role } from "discord.js"
-import TweetImageEmbed from "../module/tweetImageEmbed";
+import TweetMediaEmbed from "../module/tweetMediaEmbed";
 import { MyClient } from "src/types/client";
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
 
                     let newMsg = await msg.channel.send(mc.formatter.getOutgoingMessage(message, msg))
                     const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
-                    let tie = new TweetImageEmbed(mc.twitterClient)
+                    let tie = new TweetMediaEmbed(mc.twitterClient)
                     let tweetId = tweetUrls[0].pathname.split('/').pop();
                     if (tweetId && tweetId.match(/\d+/)) {
                         let embeds = await tie.getEmbeds(tweetId)
