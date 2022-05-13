@@ -1,5 +1,5 @@
 import fs = require('fs')
-import { cwd } from 'process'
+import { cwd, exit } from 'process'
 import { Client, Intents, Collection } from "discord.js"
 import { MyClient } from './types/client'
 import DB from './utils/database'
@@ -7,6 +7,8 @@ import 'dotenv/config'
 import path from 'path';
 import { Command } from './types/command'
 import Formatter from './components/formatter'
+import { TwitterApi } from 'twitter-api-v2'
+import TweetImageEmbed from './module/tweetImageEmbed'
 
 const client: MyClient = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
@@ -41,6 +43,13 @@ if (fs.existsSync(path.join(__dirname, 'commands'))) {
 client.db = new DB(process.env.DB_CONNSTR)
 
 client.formatter = new Formatter()
+
+// TODO add a init check later
+if (process.env.TWITTER_BEARER_TOKEN === undefined) {
+    exit(1)
+}
+let twitterApi = new TwitterApi(process.env.TWITTER_BEARER_TOKEN)
+client.twitterClient = twitterApi.readOnly;
 
 client.once('ready', () => { console.log('Ready!') })
 

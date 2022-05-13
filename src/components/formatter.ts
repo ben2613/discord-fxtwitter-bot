@@ -2,22 +2,29 @@ import { Collection, Message, MessageEmbed, User } from "discord.js"
 import utils from '../utils/utils'
 import { MessageMentions } from 'discord.js';
 
+type tryReturn = {
+    need: boolean,
+    message: string,
+    tweetUrls: URL[],
+}
+
 export default class Formatter {
-    public tryNeedFxtwitter = function (msgContent: string, embeds: MessageEmbed[]): { need: boolean, message: string } {
+    public tryNeedFxtwitter = function (msgContent: string, embeds: MessageEmbed[]): tryReturn {
         let parts = msgContent.split(utils.urlPattern)
         let allEmbedUrl = embeds.reduce((urls, next) => urls + next.url, '')
-        let ret = { need: false, message: '' }
+        let ret: tryReturn = { need: false, message: '', tweetUrls: [] }
         let build: string[] = []
         for (let p of parts) {
             if (utils.isTweetURL(p)) {
                 let url = new URL(p)
                 // check if it is in embed
                 if (!allEmbedUrl.includes(p)) {
-                    url.hostname = 'fxtwitter.com'
+                    // url.hostname = 'fxtwitter.com'
                     ret.need = true;
                 }
                 // remove the query part
                 url.search = '';
+                ret.tweetUrls.push(url)
                 build.push(url.toString())
             } else {
                 build.push(p)

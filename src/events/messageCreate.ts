@@ -1,4 +1,5 @@
 import { Message, MessageEmbed, Role } from "discord.js"
+import TweetImageEmbed from "../module/tweetImageEmbed";
 import { MyClient } from "src/types/client";
 
 module.exports = {
@@ -7,6 +8,11 @@ module.exports = {
         // return if DM
         if (msg.guild === null || msg.guildId === null) {
             return;
+        }
+        // return if self
+        if (msg.client.user && msg.author.equals(msg.client.user)) {
+            console.log('My own message')
+            return
         }
         // ignore if user belongs to a role blacklisted
         let member = msg.guild.members.cache.get(msg.author.id);
@@ -37,11 +43,20 @@ module.exports = {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
             setTimeout(async () => {
-                let { need, message } = mc.formatter.tryNeedFxtwitter(msg.content, msg.embeds);
+                let { need, message, tweetUrls } = mc.formatter.tryNeedFxtwitter(msg.content, msg.embeds);
                 if (need) {
                     msg.delete()
+
                     let newMsg = await msg.channel.send(mc.formatter.getOutgoingMessage(message, msg))
                     const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                    let tie = new TweetImageEmbed(mc.twitterClient)
+                    let tweetId = tweetUrls[0].pathname.split('/').pop();
+                    if (tweetId && tweetId.match(/\d+/)) {
+                        let embeds = await tie.getEmbeds(tweetId)
+                        if (embeds.length > 0) {
+                            newMsg.edit({ embeds: [embeds[0]] })
+                        }
+                    }
                     if (boki) {
                         await newMsg.react(boki)
                     }
