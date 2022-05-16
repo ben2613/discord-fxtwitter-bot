@@ -1,6 +1,7 @@
 import { Message, MessageEmbed, Role } from "discord.js"
 import TweetMediaEmbed from "../module/tweetMediaEmbed";
 import { MyClient } from "src/types/client";
+import { codeBlock } from "@discordjs/builders";
 
 module.exports = {
     name: 'messageCreate',
@@ -52,23 +53,27 @@ module.exports = {
                     for (let i = 0; i < embedsToSend.length; i++) {
                         let reply: Message<boolean>;
                         const e = embedsToSend[i];
-                        if (!e) {
-                            // fxtwitter is broken damn
-                            // let url = unembeddedTweets[i]
-                            // url.hostname = 'fxtwitter.com';
-                            // url.search = '';
-                            // reply = await msg.channel.send(mc.formatter.getOutgoingMessage(url.toString(), msg))
-                        } else if (e instanceof MessageEmbed) {
-                            reply = await msg.channel.send({
-                                content: mc.formatter.getOutgoingMessage('', msg),
-                                embeds: [e],
-                            })
-                            const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
-                            if (boki) {
-                                await reply.react(boki)
-                            }
-                            reply.react('❌')
+                        if (e.url) { // mp4
+                            reply = await msg.reply({
+                                content: e.url + "\n" + codeBlock("Author: " + e.embed.author?.name + "\n" + e.embed.description + ' '),
+                                allowedMentions: {
+                                    repliedUser: false,
+                                }
+                            });
+                        } else {
+                            reply = await msg.reply({
+                                content: e.url ?? '',
+                                embeds: [e.embed],
+                                allowedMentions: {
+                                    repliedUser: false,
+                                }
+                            });
                         }
+                        const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                        if (boki) {
+                            await reply.react(boki)
+                        }
+                        reply.react('❌')
 
                     }
                 }
