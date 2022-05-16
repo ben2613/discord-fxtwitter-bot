@@ -43,25 +43,56 @@ module.exports = {
             // embeds are empty at the beginning but appears after wait
             // dunno why yet
             setTimeout(async () => {
-                let { need, message, tweetUrls } = mc.formatter.tryNeedFxtwitter(msg.content, msg.embeds);
-                if (need) {
-                    msg.delete()
-
-                    let newMsg = await msg.channel.send(mc.formatter.getOutgoingMessage(message, msg))
-                    const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
-                    let tie = new TweetMediaEmbed(mc.twitterClient)
-                    let tweetId = tweetUrls[0].pathname.split('/').pop();
-                    if (tweetId && tweetId.match(/\d+/)) {
-                        let embeds = await tie.getEmbeds(tweetId)
-                        if (embeds.length > 0) {
-                            newMsg.edit({ embeds: [embeds[0]] })
+                // do not delete original message
+                // extract un-embeded tweeturls
+                let unembeddedTweets = mc.formatter.extractUnembeddedTweetURLs(msg.content, msg.embeds);
+                if (unembeddedTweets.length !== 0) {
+                    let tie = new TweetMediaEmbed(mc.twitterClient, mc.db)
+                    let embedsToSend = await tie.getEmbedsFromUrls(unembeddedTweets);
+                    for (let i = 0; i < embedsToSend.length; i++) {
+                        let reply: Message<boolean>;
+                        const e = embedsToSend[i];
+                        if (!e) {
+                            // fxtwitter is broken damn
+                            // let url = unembeddedTweets[i]
+                            // url.hostname = 'fxtwitter.com';
+                            // url.search = '';
+                            // reply = await msg.channel.send(mc.formatter.getOutgoingMessage(url.toString(), msg))
+                        } else if (e instanceof MessageEmbed) {
+                            reply = await msg.channel.send({
+                                content: mc.formatter.getOutgoingMessage('', msg),
+                                embeds: [e],
+                            })
+                            const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                            if (boki) {
+                                await reply.react(boki)
+                            }
+                            reply.react('❌')
                         }
+
                     }
-                    if (boki) {
-                        await newMsg.react(boki)
-                    }
-                    newMsg.react('❌')
                 }
+                // for each tweeturls
+
+                // let { need, message, tweetUrls } = mc.formatter.tryNeedFxtwitter(msg.content, msg.embeds);
+                // if (need) {
+                //     msg.delete()
+
+                //     let newMsg = await msg.channel.send(mc.formatter.getOutgoingMessage(message, msg))
+                //     const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                //     let tie = new TweetMediaEmbed(mc.twitterClient)
+                //     let tweetId = tweetUrls[0].pathname.split('/').pop();
+                //     if (tweetId && tweetId.match(/\d+/)) {
+                //         let embeds = await tie.getEmbeds(tweetId)
+                //         if (embeds.length > 0) {
+                //             newMsg.edit({ embeds: [embeds[0]] })
+                //         }
+                //     }
+                //     if (boki) {
+                //         await newMsg.react(boki)
+                //     }
+                //     newMsg.react('❌')
+                // }
             }, 5000)
         }
     }

@@ -1,50 +1,69 @@
-import { MessageEmbed } from "discord.js";
-import { TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
-
+import { Message, MessageEmbed, MessagePayload } from "discord.js";
+import Database from "src/utils/database";
+import { MediaObjectV2, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
+type Media = {
+    urls: URL[],
+    type: string,
+}
 export default class TweetImageEmbed {
     twitterClient: TwitterApiReadOnly;
-    constructor(twitterClient: TwitterApiReadOnly) {
+    db: Database;
+    constructor(twitterClient: TwitterApiReadOnly, db: Database) {
         this.twitterClient = twitterClient;
+        this.db = db;
     }
-    async getEmbeds(tweetId: string): Promise<MessageEmbed[]> {
+    async getEmbedsFromUrls(tweetURLs: URL[]) {
+        let tweetIds = tweetURLs.map(url => url.pathname.split('/').pop() as string);
+        let embedsOrFalse = await Promise.all(tweetIds.map(this.getEmbed, this))
+        return embedsOrFalse;
+    }
+
+    async getEmbed(tweetId: string): Promise<MessageEmbed | boolean> {
         let tweet = await this.fetchTweet(tweetId);
-        return this.formatFirstEmbed(this.buildEmbeds(await this.getMediaUrl(tweetId)), tweet)
+        let tweetMedia = this.getTweetMedia(tweet);
+        if (tweetMedia?.type === 'photo') {
+            return this.buildEmbed(tweetMedia, tweet);
+        } else {
+            return false;
+        }
     }
-    async fetchTweet(tweetId: string) {
-        return this.twitterClient.v2.tweets(tweetId, {
+    async fetchTweet(tweetId: string): Promise<TweetV2LookupResult> {
+        let ret = await this.twitterClient.v2.tweets(tweetId, {
             // "tweet.fields": ["attachments"],
-            "media.fields": ["url"],
+            "media.fields": ["url", "type"],
             "user.fields": ["url", "username", "profile_image_url"],
             "tweet.fields": ["public_metrics", "created_at"],
             "expansions": ["attachments.media_keys", "author_id"],
-        });
-    }
-    async getMediaUrl(tweetId: string): Promise<string[]> {
-        let ret: string[] = [];
-        let a = await this.twitterClient.v2.tweets(tweetId, {
-            "media.fields": ["url"],
-            "expansions": ["attachments.media_keys", "author_id"]
-        });
-        if (a.includes !== undefined && a.includes.media !== undefined) {
-            for (let i = 0; i < a.includes.media.length; i++) {
-                ret.push(a.includes.media.at(i)?.url as string)
-            }
-        }
+        })
         return ret;
     }
-    buildEmbeds(imageUrl: string[]): MessageEmbed[] {
-        return imageUrl.map(url => {
-            let embed = new MessageEmbed();
-            embed.setFields()
-            embed.setImage(url);
-            return embed;
-        })
+    getTweetMedia(tweet: TweetV2LookupResult): Media | undefined {
+        if (tweet.includes === undefined || tweet.includes.media === undefined || tweet.includes.media.length === 0) {
+            return undefined
+        }
+        let marr = tweet.includes.media;
+        let urls: URL[] = [];
+        marr.forEach(m => { if (m.url !== undefined) { urls.push(new URL(m.url)) } })
+        return {
+            urls,
+            type: marr[0].type
+        };
     }
-    formatFirstEmbed(embeds: MessageEmbed[], tweet: TweetV2LookupResult) {
+
+    // TODO functions for flip page feature later
+    saveMediaURLs(urls: string[], tweetId: string) {
+        this.db.setGlobal('tweet' + tweetId, urls);
+    }
+    getMediaURLs(tweetId: string): Promise<unknown> {
+        return this.db.getGlobal('tweet' + tweetId);
+    }
+    buildEmbed(media: Media, tweet: TweetV2LookupResult): MessageEmbed {
+        let embed = new MessageEmbed();
+        embed.setImage(media.urls[0].toString())
         if (tweet.includes && tweet.includes?.users) {
             let user = tweet.includes?.users[0];
             let url = `https://twitter.com/${user.username}/status/${tweet.data[0].id}`
-            embeds[0].setAuthor({
+            embed.setAuthor({
                 name: user.name,
                 url: url,
                 iconURL: user.profile_image_url,
@@ -53,9 +72,9 @@ export default class TweetImageEmbed {
                 + "＿＿♥" + tweet.data[0].public_metrics?.like_count
             ).setTimestamp(new Date(tweet.data[0].created_at as string))
                 .setFooter({
-                    text: `( 1 / ${embeds.length} )`
+                    text: `( 1 / ${media.urls.length} )`
                 })
         }
-        return embeds;
+        return embed;
     }
 }

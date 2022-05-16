@@ -2,35 +2,18 @@ import { Collection, Message, MessageEmbed, User } from "discord.js"
 import utils from '../utils/utils'
 import { MessageMentions } from 'discord.js';
 
-type tryReturn = {
-    need: boolean,
-    message: string,
-    tweetUrls: URL[],
-}
-
 export default class Formatter {
-    public tryNeedFxtwitter = function (msgContent: string, embeds: MessageEmbed[]): tryReturn {
+    public extractUnembeddedTweetURLs = function (msgContent: string, embeds: MessageEmbed[]): URL[] {
         let parts = msgContent.split(utils.urlPattern)
         let allEmbedUrl = embeds.reduce((urls, next) => urls + next.url, '')
-        let ret: tryReturn = { need: false, message: '', tweetUrls: [] }
-        let build: string[] = []
+        let ret: URL[] = []
         for (let p of parts) {
-            if (utils.isTweetURL(p)) {
-                let url = new URL(p)
+            if (utils.isTweetURL(p) && !allEmbedUrl.includes(p)) {
                 // check if it is in embed
-                if (!allEmbedUrl.includes(p)) {
-                    // url.hostname = 'fxtwitter.com'
-                    ret.need = true;
-                }
-                // remove the query part
-                url.search = '';
-                ret.tweetUrls.push(url)
-                build.push(url.toString())
-            } else {
-                build.push(p)
+                let url = new URL(p)
+                ret.push(url)
             }
         }
-        ret.message = build.join('')
         return ret;
     }
     public getOutgoingMessage(prefxMsg: string, msg: Message): string {
@@ -39,6 +22,7 @@ export default class Formatter {
         prefxMsg = this._removeMentions(prefxMsg, msg.mentions.users);
         return utils.messageTemplate(msg.author.toString(), prefxMsg);
     }
+    /** flow changed, not used any more */
     private _removeMentions(content: string, users: Collection<string, User>): string {
         let matches = content.matchAll(MessageMentions.USERS_PATTERN);
         for (let m of matches) {
