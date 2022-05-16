@@ -1,7 +1,7 @@
 import { Message, MessageEmbed, Role } from "discord.js"
 import TweetMediaEmbed from "../module/tweetMediaEmbed";
 import { MyClient } from "src/types/client";
-import { codeBlock } from "@discordjs/builders";
+import { blockQuote, codeBlock, quote } from "@discordjs/builders";
 
 module.exports = {
     name: 'messageCreate',
@@ -55,7 +55,9 @@ module.exports = {
                         const e = embedsToSend[i];
                         if (e.url) { // mp4
                             reply = await msg.reply({
-                                content: e.url + "\n" + codeBlock("Author: " + e.embed.author?.name + "\n" + e.embed.description + ' '),
+                                content: mc.formatter.hideAllLinkEmbed(
+                                    e.embed.author?.name + "\n" + e.embed.description).split("\n").map(quote).join("\n")
+                                    + "\n" + e.url,
                                 allowedMentions: {
                                     repliedUser: false,
                                 }

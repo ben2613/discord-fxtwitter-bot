@@ -105,7 +105,7 @@ export default class TweetImageEmbed {
             name: user.name,
             url: url,
             iconURL: user.profile_image_url_https,
-        }).setDescription(tweet.full_text ?? ''
+        }).setDescription((tweet.full_text ?? '')
             + "\n\n🔁" + tweet.retweet_count
             + "＿＿♥" + tweet.favorite_count
         ).setTimestamp(new Date(tweet.created_at))

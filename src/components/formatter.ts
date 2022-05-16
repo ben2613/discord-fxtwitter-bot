@@ -1,6 +1,7 @@
 import { Collection, Message, MessageEmbed, User } from "discord.js"
 import utils from './utils'
 import { MessageMentions } from 'discord.js';
+import { hideLinkEmbed } from "@discordjs/builders";
 
 export default class Formatter {
     public extractUnembeddedTweetURLs = function (msgContent: string, embeds: MessageEmbed[]): URL[] {
@@ -29,5 +30,8 @@ export default class Formatter {
             content = content.replace(m[0], '@' + (users.get(m[1])?.username ?? ''))
         }
         return content;
+    }
+    public hideAllLinkEmbed(c: string) {
+        return c.split(utils.urlPattern).map(p => p.startsWith('http') ? hideLinkEmbed(p) : p).join('')
     }
 }
