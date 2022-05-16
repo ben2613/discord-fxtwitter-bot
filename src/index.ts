@@ -2,7 +2,7 @@ import fs = require('fs')
 import { cwd, exit } from 'process'
 import { Client, Intents, Collection } from "discord.js"
 import { MyClient } from './types/client'
-import DB from './utils/database'
+import DB from './components/database'
 import 'dotenv/config'
 import path from 'path';
 import { Command } from './types/command'

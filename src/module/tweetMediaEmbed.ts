@@ -1,5 +1,5 @@
 import { Message, MessageEmbed, MessagePayload } from "discord.js";
-import Database from "src/utils/database";
+import Database from "src/components/database";
 import { MediaObjectV2, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
 type Media = {
     urls: URL[],

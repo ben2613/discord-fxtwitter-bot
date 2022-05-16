@@ -1,6 +1,6 @@
 import { MessageReaction, User } from "discord.js"
 
-import utils from '../utils/utils'
+import utils from '../components/utils'
 
 module.exports = {
     name: 'messageReactionAdd',

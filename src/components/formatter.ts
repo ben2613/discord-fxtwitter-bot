@@ -1,5 +1,5 @@
 import { Collection, Message, MessageEmbed, User } from "discord.js"
-import utils from '../utils/utils'
+import utils from './utils'
 import { MessageMentions } from 'discord.js';
 
 export default class Formatter {

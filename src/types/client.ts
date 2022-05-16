@@ -1,5 +1,5 @@
 import { Client, Collection } from "discord.js"
-import Database from "../utils/database"
+import Database from "../components/database"
 import { Command } from "./command"
 import Formatter from "../components/formatter"
 import { TwitterApiReadOnly } from "twitter-api-v2"
