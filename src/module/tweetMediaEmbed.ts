@@ -100,12 +100,12 @@ export default class TweetImageEmbed {
                 })
         }
         let user = tweet.user
-        let url = `https://twitter.com/${user.name}/status/${user.id}`
+        let url = `https://twitter.com/${user.screen_name}/status/${user.id}`
         embed.setAuthor({
             name: user.name,
             url: url,
             iconURL: user.profile_image_url_https,
-        }).setDescription(tweet.text ?? ''
+        }).setDescription(tweet.full_text ?? ''
             + "\n\n🔁" + tweet.retweet_count
             + "＿＿♥" + tweet.favorite_count
         ).setTimestamp(new Date(tweet.created_at))
