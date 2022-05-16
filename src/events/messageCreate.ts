@@ -62,7 +62,6 @@ module.exports = {
                             });
                         } else {
                             reply = await msg.reply({
-                                content: e.url ?? '',
                                 embeds: [e.embed],
                                 allowedMentions: {
                                     repliedUser: false,
