@@ -100,7 +100,7 @@ export default class TweetImageEmbed {
                 })
         }
         let user = tweet.user
-        let url = `https://twitter.com/${user.screen_name}/status/${user.id}`
+        let url = `https://twitter.com/${user.screen_name}/status/${tweet.id}`
         embed.setAuthor({
             name: user.name,
             url: url,
