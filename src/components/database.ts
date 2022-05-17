@@ -1,4 +1,6 @@
 import Keyv = require("keyv");
+import { Media } from "src/module/tweetMediaEmbed";
+import { TweetV1 } from "twitter-api-v2";
 
 export default class Database {
 
@@ -30,7 +32,13 @@ export default class Database {
     getGlobal(k: string): Promise<unknown | undefined> {
         return this._get(k);
     }
-
+    // TODO functions for flip page feature later
+    setTweetCache(tweetId: string, cache: { media: Media | null, tweet: TweetV1 }) {
+        return this.setGlobal('tweet' + tweetId, cache);
+    }
+    getTweetCache(tweetId: string): Promise<unknown | undefined> {
+        return this.getGlobal('tweet' + tweetId);
+    }
     private async _set(k: string, v: unknown): Promise<true> {
         this.cache.set(k, v);
         return await this.kv.set(k, v);

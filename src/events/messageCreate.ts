@@ -74,8 +74,12 @@ module.exports = {
                         if (boki) {
                             await reply.react(boki)
                         }
-                        reply.react('❌')
-
+                        await reply.react('❌')
+                        if (e.embed.footer?.text.match(/[234]/)) {
+                            reply.react('◀️').then(() => {
+                                reply.react('▶️')
+                            })
+                        }
                     }
                 }
                 // for each tweeturls

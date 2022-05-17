@@ -1,9 +1,13 @@
 import { Message, MessageEmbed, MessagePayload } from "discord.js";
 import Database from "src/components/database";
 import { MediaEntityV1, MediaObjectV2, TweetV1, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
-type Media = {
+export type Media = {
     urls: string[],
     type: string,
+}
+export type Cache = {
+    media: Media | null,
+    tweet: TweetV1
 }
 export default class TweetImageEmbed {
     twitterClient: TwitterApiReadOnly;
@@ -21,18 +25,18 @@ export default class TweetImageEmbed {
     async getEmbed(tweetId: string): Promise<{ url?: string, embed: MessageEmbed }> {
         let tweet: TweetV1 | null = null;
         let media: Media | null = null;
-        let cached = await this.getMediaURLs(tweetId);
+        let cached = await this.db.getTweetCache(tweetId);
         if (cached !== undefined) {
-            let { media: m, tweet: t } = cached as { media: Media | null, tweet: TweetV1 }
+            let { media: m, tweet: t } = cached as Cache
             tweet = t;
             media = m;
         } else {
             tweet = await this.fetchTweetv1(tweetId);
             media = this.getTweetMediav1(tweet);
             if (media !== null) {
-                await this.setMediaURLs(tweetId, { tweet, media })
+                await this.db.setTweetCache(tweetId, { tweet, media })
             } else {
-                await this.setMediaURLs(tweetId, { tweet, media: null })
+                await this.db.setTweetCache(tweetId, { tweet, media: null })
             }
         }
         if (media?.type === 'photo') {
@@ -97,14 +101,6 @@ export default class TweetImageEmbed {
             urls: tweet.extended_entities.media.map(getUrlByType),
         }
     }
-
-    // TODO functions for flip page feature later
-    setMediaURLs(tweetId: string, cache: { media: Media | null, tweet: TweetV1 }) {
-        return this.db.setGlobal('tweet' + tweetId, cache);
-    }
-    getMediaURLs(tweetId: string): Promise<unknown | undefined> {
-        return this.db.getGlobal('tweet' + tweetId);
-    }
     buildEmbed(media: Media | null, tweet: TweetV1): MessageEmbed {
         let embed = new MessageEmbed();
         if (media !== null) {
@@ -114,7 +110,7 @@ export default class TweetImageEmbed {
                 })
         }
         let user = tweet.user
-        let url = `https://twitter.com/${user.screen_name}/status/${tweet.id}`
+        let url = `https://twitter.com/${user.screen_name}/status/${tweet.id_str}`
         embed.setAuthor({
             name: user.name,
             url: url,
