@@ -2,7 +2,7 @@ import { Message, MessageEmbed, MessagePayload } from "discord.js";
 import Database from "src/components/database";
 import { MediaEntityV1, MediaObjectV2, TweetV1, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
 type Media = {
-    urls: URL[],
+    urls: string[],
     type: string,
 }
 export default class TweetImageEmbed {
@@ -44,8 +44,8 @@ export default class TweetImageEmbed {
             return undefined
         }
         let marr = tweet.includes.media;
-        let urls: URL[] = [];
-        marr.forEach(m => { if (m.url !== undefined) { urls.push(new URL(m.url)) } })
+        let urls: string[] = [];
+        marr.forEach(m => { if (m.url !== undefined) { urls.push(m.url) } })
         return {
             urls,
             type: marr[0].type
@@ -59,9 +59,9 @@ export default class TweetImageEmbed {
         if (tweet.extended_entities === undefined || tweet.extended_entities.media === undefined) {
             return null;
         }
-        function getUrlByType(e: MediaEntityV1): URL {
+        function getUrlByType(e: MediaEntityV1): string {
             if (e.type === 'video' || e.type === 'animated_gif') {
-                return new URL(e.video_info?.variants.reduce((p, c) => {
+                return e.video_info?.variants.reduce((p, c) => {
                     if (!p.content_type.startsWith('video')) {
                         return c;
                     }
@@ -73,9 +73,9 @@ export default class TweetImageEmbed {
                     } else {
                         return c;
                     }
-                }, { bitrate: 0, content_type: 'dummy', url: '' }).url as string)
+                }, { bitrate: 0, content_type: 'dummy', url: '' }).url as string
             } else { // photo
-                return new URL(e.media_url)
+                return e.media_url;
             }
         }
         return {
@@ -85,10 +85,10 @@ export default class TweetImageEmbed {
     }
 
     // TODO functions for flip page feature later
-    saveMediaURLs(urls: string[], tweetId: string) {
+    saveMediaURLs(tweetId: string, urls: string[]) {
         this.db.setGlobal('tweet' + tweetId, urls);
     }
-    getMediaURLs(tweetId: string): Promise<unknown> {
+    getMediaURLs(tweetId: string): Promise<unknown | undefined> {
         return this.db.getGlobal('tweet' + tweetId);
     }
     buildEmbed(media: Media | null, tweet: TweetV1): MessageEmbed {
