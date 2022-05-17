@@ -19,14 +19,28 @@ export default class TweetImageEmbed {
     }
 
     async getEmbed(tweetId: string): Promise<{ url?: string, embed: MessageEmbed }> {
-        let tweetv1 = await this.fetchTweetv1(tweetId);
-        let mediav1 = await this.getTweetMediav1(tweetv1);
-        console.log(tweetv1.entities)
-        console.log(mediav1)
-        if (mediav1?.type === 'photo') {
-            return { embed: this.buildEmbed(mediav1, tweetv1) };
+        let tweet: TweetV1 | null = null;
+        let media: Media | null = null;
+        let cached = await this.getMediaURLs(tweetId);
+        if (cached !== undefined) {
+            let { media: m, tweet: t } = cached as { media: Media | null, tweet: TweetV1 }
+            tweet = t;
+            media = m;
         } else {
-            return { url: mediav1?.urls[0].toString() ?? '', embed: this.buildEmbed(mediav1, tweetv1) };
+            tweet = await this.fetchTweetv1(tweetId);
+            media = this.getTweetMediav1(tweet);
+            if (media !== null) {
+                await this.setMediaURLs(tweetId, { tweet, media })
+            } else {
+                await this.setMediaURLs(tweetId, { tweet, media: null })
+            }
+        }
+        if (media?.type === 'photo') {
+            return { embed: this.buildEmbed(media, tweet) };
+        } else if (media !== null) { // mp4
+            return { url: media?.urls[0].toString() ?? '', embed: this.buildEmbed(media, tweet) };
+        } else { // text only tweet?
+            return { embed: this.buildEmbed(null, tweet) };
         }
     }
     async fetchTweet(tweetId: string): Promise<TweetV2LookupResult> {
@@ -85,8 +99,8 @@ export default class TweetImageEmbed {
     }
 
     // TODO functions for flip page feature later
-    saveMediaURLs(tweetId: string, urls: string[]) {
-        this.db.setGlobal('tweet' + tweetId, urls);
+    setMediaURLs(tweetId: string, cache: { media: Media | null, tweet: TweetV1 }) {
+        return this.db.setGlobal('tweet' + tweetId, cache);
     }
     getMediaURLs(tweetId: string): Promise<unknown | undefined> {
         return this.db.getGlobal('tweet' + tweetId);
