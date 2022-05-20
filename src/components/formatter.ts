@@ -5,15 +5,13 @@ import { hideLinkEmbed } from "@discordjs/builders";
 
 export default class Formatter {
     public extractUnembeddedTweetURLs = function (msgContent: string, embeds: MessageEmbed[]): URL[] {
+        // remove all the codeblocks before checking
+        msgContent = msgContent.replace(/(```[\s\S]*?```)/, '').replace(/`.*`/, '')
         let lines = msgContent.split("\n")
         let lineparts = lines.map(l => { return { line: l, parts: l.split(utils.urlPattern) } });
         let allEmbedUrl = embeds.reduce((urls, next) => urls + next.url, '')
         let ret: URL[] = []
         for (let { line, parts } of lineparts) {
-            // if the link is unembed <> or in quote return
-            if (line.startsWith('>')) {
-                continue;
-            }
             for (let i = 0; i < parts.length; i++) {
                 const p = parts[i];
                 if (i !== 0 && i !== parts.length - 1) {
