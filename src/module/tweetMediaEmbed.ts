@@ -21,24 +21,12 @@ export default class TweetImageEmbed {
         let embeds = await Promise.all(tweetIds.map(this.getEmbed, this))
         return embeds;
     }
-
+    async getPossibleSensitive(tweetURL: URL): Promise<boolean> {
+        let { tweet } = await this.getTweetAndMediaFromCache(tweetURL.pathname.split('/').pop() as string);
+        return tweet.possibly_sensitive === true;
+    }
     async getEmbed(tweetId: string): Promise<{ url?: string, embed: MessageEmbed }> {
-        let tweet: TweetV1 | null = null;
-        let media: Media | null = null;
-        let cached = await this.db.getTweetCache(tweetId);
-        if (cached !== undefined) {
-            let { media: m, tweet: t } = cached as Cache
-            tweet = t;
-            media = m;
-        } else {
-            tweet = await this.fetchTweetv1(tweetId);
-            media = this.getTweetMediav1(tweet);
-            if (media !== null) {
-                await this.db.setTweetCache(tweetId, { tweet, media })
-            } else {
-                await this.db.setTweetCache(tweetId, { tweet, media: null })
-            }
-        }
+        let { tweet, media } = await this.getTweetAndMediaFromCache(tweetId);
         if (media?.type === 'photo') {
             return { embed: this.buildEmbed(media, tweet) };
         } else if (media !== null) { // mp4
@@ -120,5 +108,24 @@ export default class TweetImageEmbed {
             + "＿＿♥" + tweet.favorite_count
         ).setTimestamp(new Date(tweet.created_at))
         return embed;
+    }
+    async getTweetAndMediaFromCache(tweetId: string) {
+        let tweet: TweetV1 | null = null;
+        let media: Media | null = null;
+        let cached = await this.db.getTweetCache(tweetId);
+        if (cached !== undefined) {
+            let { media: m, tweet: t } = cached as Cache
+            tweet = t;
+            media = m;
+        } else {
+            tweet = await this.fetchTweetv1(tweetId);
+            media = this.getTweetMediav1(tweet);
+            if (media !== null) {
+                await this.db.setTweetCache(tweetId, { tweet, media })
+            } else {
+                await this.db.setTweetCache(tweetId, { tweet, media: null })
+            }
+        }
+        return { tweet, media };
     }
 }

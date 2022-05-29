@@ -4,6 +4,34 @@ import { MessageMentions } from 'discord.js';
 import { hideLinkEmbed } from "@discordjs/builders";
 
 export default class Formatter {
+    public extractVisibleTweetURLs = function (msgContent: string): URL[] {
+        // remove all the codeblocks before checking
+        msgContent = msgContent.replace(/(```[\s\S]*?```)/, '').replace(/`.*`/, '')
+        let lines = msgContent.split("\n")
+        let lineparts = lines.map(l => { return { line: l, parts: l.split(utils.urlPattern) } });
+        let ret: URL[] = []
+        for (let { line, parts } of lineparts) {
+            for (let i = 0; i < parts.length; i++) {
+                const p = parts[i];
+                if (i !== 0 && i !== parts.length - 1) {
+                    if (parts[i - 1].endsWith('<') && parts[i + 1].startsWith('>'))
+                        continue;
+                }
+                if (utils.isTweetURL(p)) {
+                    // check if it is in embed
+                    let url = new URL(p)
+                    ret.push(url)
+                }
+            }
+        }
+        return ret;
+    }
+    /**
+     * @deprecated
+     * @param msgContent 
+     * @param embeds 
+     * @returns 
+     */
     public extractUnembeddedTweetURLs = function (msgContent: string, embeds: MessageEmbed[]): URL[] {
         // remove all the codeblocks before checking
         msgContent = msgContent.replace(/(```[\s\S]*?```)/, '').replace(/`.*`/, '')
