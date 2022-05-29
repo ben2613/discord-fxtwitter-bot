@@ -1,6 +1,6 @@
-import { Message, MessageEmbed, MessagePayload } from "discord.js";
+import { MessageEmbed } from "discord.js";
 import Database from "src/components/database";
-import { MediaEntityV1, MediaObjectV2, TweetV1, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
+import { MediaEntityV1, TweetV1, TweetV2LookupResult, TwitterApiReadOnly } from "twitter-api-v2";
 export type Media = {
     urls: string[],
     type: string,
@@ -107,6 +107,7 @@ export default class TweetImageEmbed {
             + "\n\n🔁" + tweet.retweet_count
             + "＿＿♥" + tweet.favorite_count
         ).setTimestamp(new Date(tweet.created_at))
+            .setURL(url)
         return embed;
     }
     async getTweetAndMediaFromCache(tweetId: string) {
