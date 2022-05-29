@@ -62,22 +62,20 @@ module.exports = {
                         });
                     } else {
                         let row = new MessageActionRow();
-                        let components: MessageActionRow[] = [row];
+                        let components = [row];
                         // Get the total page
                         let totalPage = Number(e.embed.footer?.text.match(/\d \/ ([1234])/)?.at(1)) ?? 1;
                         row.addComponents(new MessageButton().setCustomId('delete').setLabel('X').setStyle('DANGER'))
                         if (totalPage !== 1) {
-                            let row2 = new MessageActionRow();
-                            components.push(row2);
-                            for (let i = 0; i < totalPage; i++) {
-                                row2.addComponents(
+                            for (let i = 1; i < totalPage; i++) {
+                                row.addComponents(
                                     new MessageButton()
                                         .setCustomId('flip_page_' + (i + 1))
                                         .setLabel('' + (i + 1))
                                         .setStyle('PRIMARY')
                                 )
                             }
-                            row2.addComponents(
+                            row.addComponents(
                                 new MessageButton()
                                     .setCustomId('expand_all')
                                     .setLabel('All')
