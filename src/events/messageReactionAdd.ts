@@ -30,8 +30,8 @@ module.exports = {
             return
         }
         if (reaction.message.content === null) return;
-
-        const authorId = reaction.message.mentions.repliedUser?.id
+        let orgMsg = await reaction.message.fetchReference();
+        const authorId = orgMsg.author.id;
         if (user.id === authorId && reaction.emoji.toString() === '❌') {
             reaction.message.delete()
         }
