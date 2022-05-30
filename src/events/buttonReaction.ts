@@ -16,6 +16,11 @@ module.exports = {
                 const authorId = orgMsg.author.id;
                 if (interaction.user.id === authorId) {
                     msg.delete()
+                } else {
+                    interaction.reply({
+                        content: 'Only original poster can delete',
+                        ephemeral: true,
+                    })
                 }
             }
             return;
