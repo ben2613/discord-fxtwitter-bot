@@ -41,62 +41,64 @@ module.exports = {
         }
         if (msg.content.includes("https://twitter.com/")) {
             // do not delete original message
-            // extract visible tweet urls
-            let tweetUrls = mc.formatter.extractVisibleTweetURLs(msg.content);
-            let tie = mc.tweetMediaEmbedService;
-            let filterRes = await Promise.all(tweetUrls.map(tie.getPossibleSensitive, tie));
-            tweetUrls = tweetUrls.filter((v, i) => filterRes[i]);
-            if (tweetUrls.length !== 0) {
-                let embedsToSend = await tie.getEmbedsFromUrls(tweetUrls);
-                for (let i = 0; i < embedsToSend.length; i++) {
-                    let reply: Message<boolean>;
-                    const e = embedsToSend[i];
-                    if (e.url) { // mp4
-                        reply = await msg.reply({
-                            content: mc.formatter.hideAllLinkEmbed(
-                                e.embed.author?.name + "\n" + e.embed.description).split("\n").map(quote).join("\n")
-                                + "\n" + e.url,
-                            allowedMentions: {
-                                repliedUser: false,
+            setTimeout(async () => {
+                // extract visible tweet urls
+                let tweetUrls = mc.formatter.extractUnembeddedTweetURLs(msg.content, msg.embeds);
+                let tie = mc.tweetMediaEmbedService;
+                if (tweetUrls.length !== 0) {
+                    let embedsToSend = await tie.getEmbedsFromUrls(tweetUrls);
+                    for (let i = 0; i < embedsToSend.length; i++) {
+                        let reply: Message<boolean>;
+                        const e = embedsToSend[i];
+                        if (e.url) { // mp4
+                            reply = await msg.reply({
+                                content: mc.formatter.hideAllLinkEmbed(
+                                    e.embed.author?.name + "\n" + e.embed.description).split("\n").map(quote).join("\n")
+                                    + "\n" + e.url,
+                                allowedMentions: {
+                                    repliedUser: false,
+                                }
+                            });
+                        } else {
+                            let row = new MessageActionRow();
+                            let components = [row];
+                            // Get the total page
+                            let totalPage = Number(e.embed.footer?.text.match(/\d \/ ([1234])/)?.at(1)) ?? 1;
+                            row.addComponents(new MessageButton().setCustomId('delete').setLabel('X').setStyle('DANGER'))
+                            if (totalPage !== 1) {
+                                for (let i = 1; i < totalPage; i++) {
+                                    row.addComponents(
+                                        new MessageButton()
+                                            .setCustomId('flip_page_' + (i + 1))
+                                            .setLabel('' + (i + 1))
+                                            .setStyle('PRIMARY')
+                                    )
+                                }
+                                if (totalPage > 2) {
+                                    row.addComponents(
+                                        new MessageButton()
+                                            .setCustomId('expand_all')
+                                            .setLabel('All')
+                                            .setStyle('SUCCESS')
+                                    )
+                                }
                             }
-                        });
-                    } else {
-                        let row = new MessageActionRow();
-                        let components = [row];
-                        // Get the total page
-                        let totalPage = Number(e.embed.footer?.text.match(/\d \/ ([1234])/)?.at(1)) ?? 1;
-                        row.addComponents(new MessageButton().setCustomId('delete').setLabel('X').setStyle('DANGER'))
-                        if (totalPage !== 1) {
-                            for (let i = 1; i < totalPage; i++) {
-                                row.addComponents(
-                                    new MessageButton()
-                                        .setCustomId('flip_page_' + (i + 1))
-                                        .setLabel('' + (i + 1))
-                                        .setStyle('PRIMARY')
-                                )
-                            }
-                            row.addComponents(
-                                new MessageButton()
-                                    .setCustomId('expand_all')
-                                    .setLabel('All')
-                                    .setStyle('SUCCESS')
-                            )
+                            reply = await msg.reply({
+                                embeds: [e.embed],
+                                allowedMentions: {
+                                    repliedUser: false,
+                                },
+                                components,
+                            });
                         }
-                        reply = await msg.reply({
-                            embeds: [e.embed],
-                            allowedMentions: {
-                                repliedUser: false,
-                            },
-                            components,
-                        });
+                        // const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                        // if (boki) {
+                        //     await reply.react(boki)
+                        // }
+                        // await reply.react('❌')
                     }
-                    // const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
-                    // if (boki) {
-                    //     await reply.react(boki)
-                    // }
-                    // await reply.react('❌')
                 }
-            }
+            }, 4000)
         }
     }
 }
