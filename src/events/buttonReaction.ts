@@ -18,7 +18,7 @@ module.exports = {
                     msg.delete()
                 } else {
                     interaction.reply({
-                        content: 'Only original poster can delete',
+                        content: '只有原PO能刪掉',
                         ephemeral: true,
                     })
                 }
