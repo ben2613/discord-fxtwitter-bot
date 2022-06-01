@@ -1,5 +1,5 @@
 import fs = require('fs')
-import { exit } from 'process'
+import { cwd, exit } from 'process'
 import { Client, Intents, Collection } from "discord.js"
 import { MyClient } from './types/client'
 import DB from './components/database'
@@ -7,7 +7,6 @@ import 'dotenv/config'
 import path from 'path';
 import { Command } from './types/command'
 import Formatter from './components/formatter'
-import TweetMediaEmbed from "./module/tweetMediaEmbed";
 import { TwitterApi } from 'twitter-api-v2'
 
 const client: MyClient = new Client({
@@ -50,8 +49,6 @@ if (process.env.TWITTER_BEARER_TOKEN === undefined) {
 }
 let twitterApi = new TwitterApi(process.env.TWITTER_BEARER_TOKEN)
 client.twitterClient = twitterApi.readOnly;
-
-client.tweetMediaEmbedService = new TweetMediaEmbed(client.twitterClient, client.db);
 
 client.once('ready', () => { console.log('Ready!') })
 
