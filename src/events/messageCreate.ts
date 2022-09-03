@@ -12,7 +12,6 @@ module.exports = {
         }
         // return if self
         if (msg.client.user && msg.author.equals(msg.client.user)) {
-            console.log('My own message')
             return
         }
         // ignore if user belongs to a role blacklisted
@@ -20,6 +19,13 @@ module.exports = {
         if (member === undefined) {
             console.error('Should not happen');
             return
+        }
+        if (msg.author.id === '868834975053656136' && msg.content.match(/已發完,本次發了\d+則/)) {
+            const light = msg.client.emojis.cache.find(emoji => emoji.name === "Kokoro_Watch");
+            if (light) {
+                msg.channel.send(light.toString());
+            }
+            return;
         }
         let mc = msg.client as MyClient;
         let blacklist = await mc.db.get(msg.guildId, 'roleblacklist') as string[] | undefined;
