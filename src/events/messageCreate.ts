@@ -74,11 +74,11 @@ module.exports = {
                                 }
                             });
                         }
-                        const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
-                        if (boki) {
-                            await reply.react(boki)
-                        }
-                        await reply.react('❌')
+                        // const boki = msg.client.emojis.cache.find(emoji => emoji.name !== null && emoji.name.includes('Boki'))
+                        // if (boki) {
+                        //     await reply.react(boki)
+                        // }
+                        // await reply.react('❌')
                         if (e.embed.footer?.text.match(/[234]/)) {
                             reply.react('◀️').then(() => {
                                 reply.react('▶️')
